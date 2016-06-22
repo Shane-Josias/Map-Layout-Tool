@@ -1,0 +1,10 @@
+#!/home/shane/VASTech/Map-Layout-Tool/kartog/kartograph/bin/python
+# EASY-INSTALL-ENTRY-SCRIPT: 'kartograph.py==0.6.8','console_scripts','kartograph'
+__requires__ = 'kartograph.py==0.6.8'
+import sys
+from pkg_resources import load_entry_point
+
+if __name__ == '__main__':
+    sys.exit(
+        load_entry_point('kartograph.py==0.6.8', 'console_scripts', 'kartograph')()
+    )

@@ -1,0 +1,3 @@
+[console_scripts]
+kartograph = kartograph.cli:main
+

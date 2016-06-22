@@ -1,0 +1,17 @@
+Metadata-Version: 1.1
+Name: kartograph.py
+Version: 0.6.8
+Summary: Open Source Python library for generating semantic SVG maps
+Home-page: http://kartograph.org
+Author: Gregor Aisch
+Author-email: mail@driven-by-data.net
+License: MIT
+Description: 
+        Open Source Python library for generating SVG maps from shapefiles and postgis.
+        
+Platform: UNKNOWN
+Classifier: Development Status :: 3 - Alpha
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: AGPL License
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python
