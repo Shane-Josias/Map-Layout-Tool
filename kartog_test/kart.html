@@ -1,0 +1,16 @@
+<html>
+    <head>
+        <script src="jquery-3.0.0.min.js"></script>
+        <script src="raphael.min.js"></script>
+        <script src="kartograph.min.js"></script>
+    </head>
+    <body>
+        <div id="map"></div>
+    </body>
+
+    <script type="text/javascript">
+    	var map = kartograph.map('#map', 600, 400);
+
+    	map.loadMap('mymap.svg', function(){};);
+    </script>
+</html>
