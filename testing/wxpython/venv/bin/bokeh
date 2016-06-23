@@ -1,7 +1,0 @@
-#!/home/shane/VASTech/Map-Layout-Tool/testing/wxpython/venv/bin/python2.7
-
-import sys
-
-from bokeh.command.bootstrap import main
-
-main(sys.argv)
