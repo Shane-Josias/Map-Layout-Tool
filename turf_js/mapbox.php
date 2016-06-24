@@ -5,12 +5,12 @@
         <title>A simple map</title>
         <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
         <script src='https://api.tiles.mapbox.com/mapbox.js/v2.2.4/mapbox.js'></script>
-        <script src="jquery-2.2.3.min.js"></script>
+        <script src="jquery-1.12.1.min.js"></script>
         <script src="https://d3js.org/d3.v3.min.js" charset="utf-8"></script>
         <link href='https://api.tiles.mapbox.com/mapbox.js/v2.2.4/mapbox.css' rel='stylesheet' />
         <link href="http://code.jquery.com/ui/1.9.0/themes/cupertino/jquery-ui.css" rel="stylesheet" />
         <script src="./papaparse.min.js"></script>
-
+        <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
 
         <style>
             body {
@@ -46,30 +46,55 @@
     </head>
     <body>
 
-        <div class='sidebar pad2'>Campers
+        <div id class='sidebar pad2'>Campers
 
             <?php
-                $file = fopen("products.csv","r");
-                $productNames = array();
+                $file = fopen("campers.csv","r");
+                $campers = array();
                 while(!feof($file)) {
                     $row = fgetcsv($file);
-                    array_push($productNames, $row[1]);
+                    array_push($campers, $row);
                 }
                 fclose($file);
+                echo '<ul id="menu">';
+                $num = 0;
+                foreach ($campers as $c) {
+                    echo '<li id = '.$num.'>'.$c[0].'</li>';
+                    $num = $num+1;
+                }
+                echo '</ul>';
+                // echo '<script type= "text/javascript">$("#menu").menu();</script>';
             ?>
         </div>
         <div id='map' class='map pad2'>Map</div>
-    <script>
-        // var data = csv.toArray("campers.csv");
-        // alert(data);
-        L.mapbox.accessToken = 'pk.eyJ1Ijoic2hhbmVqb3NpYXMiLCJhIjoiY2lwczZwYzVkMDAxN2h0bTJ4M3Fpa3JzZyJ9.oJQvdNDebSyjfrhPOE2xAw';
-        var map = L.mapbox.map('map', 'shanejosias.0fm4hn5h')
-         //  .setView([19.75020,-32.33300], 13);
-        
+    <script type= "text/javascript">
 
-        $( "#menu" ).menu();
-          
-     
+
+        L.mapbox.accessToken = 'pk.eyJ1Ijoic2hhbmVqb3NpYXMiLCJhIjoiY2lwczZwYzVkMDAxN2h0bTJ4M3Fpa3JzZyJ9.oJQvdNDebSyjfrhPOE2xAw';
+        var map = L.mapbox.map('map', 'shanejosias.0fm4hn5h');
+        
+        $("#menu").menu({
+            select: function(event, ui) {
+                $("#3").addClass("ui-state-enabled");
+
+            }
+        });
+
+        // $("#menu-5" ).menu({
+        //     create: function( event, ui ) {
+        //        var result = $( "#result" );
+        //        result.append( "Create event<br>" );
+        //     },
+        //     blur: function( event, ui ) {
+        //        var result = $( "#result" );
+        //        result.append( "Blur event<br>" );
+        //     },
+        //     focus: function( event, ui ) {
+        //        var result = $( "#result" );
+        //        result.append( "focus event<br>" );
+        //     }
+        //  });
+    
         
     
     </script>

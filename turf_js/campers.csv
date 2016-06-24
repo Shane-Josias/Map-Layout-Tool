@@ -1,9 +1,26 @@
-name,frontage,depth
-shane,100,100
-shane,100,100
-shane,100,100
-shane,100,100
-shane,100,100
-shane,100,100
-shane,100,100
-shane,100,100
+Lorem,100,100
+ipsum,100,100
+dolor,100,100
+sit,100,100
+amet,100,100
+consectetur,100,100
+elit,100,100
+aute,100,100
+tempor, 100, 100
+reprehenderit, 100, 100
+laboris, 100, 100
+exercitation, 100, 100
+reprehenderit, 100, 100
+dolore, 100, 100
+fugiat, 100, 100
+
+
+    var menu = $('#menu');
+
+    $(document).ready(function(){
+        menu.menu({
+            select: function(event, ui) {
+                alert(ui.item.text());
+            }
+        });
+    });
