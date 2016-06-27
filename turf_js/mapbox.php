@@ -42,6 +42,12 @@
                  -moz-box-sizing:border-box;
                       box-sizing:border-box;
               }
+            #menu {
+                list-style-type: none;
+            }
+
+            #menu .ui-selecting { background: #404040; }
+            #menu .ui-selected { background: #0000FF; color: white; }
         </style>
     </head>
     <body>
@@ -59,7 +65,7 @@
                 echo '<ul id="menu">';
                 $num = 0;
                 foreach ($campers as $c) {
-                    echo '<li id = '.$num.'>'.$c[0].'</li>';
+                    echo '<li data-frontage = "'.$c[1].'" data-depth="'.$c[2].'">'.$c[0].'</li>';
                     $num = $num+1;
                 }
                 echo '</ul>';
@@ -73,13 +79,63 @@
         L.mapbox.accessToken = 'pk.eyJ1Ijoic2hhbmVqb3NpYXMiLCJhIjoiY2lwczZwYzVkMDAxN2h0bTJ4M3Fpa3JzZyJ9.oJQvdNDebSyjfrhPOE2xAw';
         var map = L.mapbox.map('map', 'shanejosias.0fm4hn5h');
         
-        $("#menu").menu({
-            select: function(event, ui) {
-                $("#3").addClass("ui-state-enabled");
+        // $("#menu").selectable();
+        $( "#menu" ).selectable({
+            selected: function( event, ui ) {
+                var result = $( "#result" ).empty();
+                  $( ".ui-selected", this ).each(function() {
+                    var index = $( "#menu li" ).index( this );
+                     // alert( " #" + ( index + 1 ) + " " +$(this).text());
+                     // var text = $(".ui-selected").eq(0).data(index);
+                     // var article = document.getElementsByClassName(".ui-selected");
 
-            }
+                     // This obtains the relevent properties
+                    var el = document.querySelector('.ui-selected');
+                     // alert(el.dataset.frontage);
+                    var polyline;
+                    var first = 1;
+                    map.on('mousemove', function(e) {
+                         // alert(e.latlng);
+                         var xc = e.latlng.lat;
+                         var yc = e.latlng.lng;
+                         var line_points = [
+                                            [xc-0.0002, yc+0.0002],
+                                            [xc+0.0002, yc+0.0002],
+                                            [xc+0.0002, yc-0.0002],
+                                            [xc-0.0002, yc-0.0002]
+                                            ];
+                        var polyline_options = {
+                            color: '#404040'
+                        };
+                        // map.featureLayer.clearLayers();
+                        // map.removeLayer(polyline);
+                        if (first == 1) {
+                            polyline = L.polygon(line_points, polyline_options);
+                            first = 0;
+                        } else {
+                            map.removeLayer(polyline)
+                            polyline = L.polygon(line_points, polyline_options);
+                            map.addLayer(polyline);
+                        }   
+                    });
+
+                  });
+
+
+                 }
         });
 
+        $( "#menu" ).on("selectableselected", function( event, ui ) {} );
+        // map.on('mousemove', function (e) {
+        //     // document.getElementById('map').innerHTML =
+        //     // e.point is the x, y coordinates of the mousemove event relative
+        //     // to the top-left corner of the map
+        //     // JSON.stringify(e.point) + '<br />' +
+        //     // e.lngLat is the longitude, latitude geographical position of the event
+        //     alert((e).lngLat);
+        // });
+        
+        // $("#menu").toggleClass("active");
         // $("#menu-5" ).menu({
         //     create: function( event, ui ) {
         //        var result = $( "#result" );
