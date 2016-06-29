@@ -11,6 +11,9 @@
         <link href="http://code.jquery.com/ui/1.9.0/themes/cupertino/jquery-ui.css" rel="stylesheet" />
         <script src="./papaparse.min.js"></script>
         <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+        <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.20.1/mapbox-gl.js'></script>
+        <script src="turf.min.js"></script>
+
 
         <style>
             body {
@@ -91,26 +94,64 @@
 
                      // This obtains the relevent properties
                     var el = document.querySelector('.ui-selected');
-                     // alert(el.dataset.frontage);
+                    // alert(el.dataset.frontage);
+
                     var polyline;
                     var first = 1;
+                    // console.log(map);
+                    var features = map.featureLayer._geojson.features;
+                    
                     map.on('mousemove', function(e) {
                          // alert(e.latlng);
+
+                         // var features = map.queryRenderedFeatures(e.point);
+                         // var feature = e.target.feature;
                          var xc = e.latlng.lat;
                          var yc = e.latlng.lng;
-                         var line_points = [
+                         var point = turf.point([yc,xc]);
+                         // console.log([x,y])
+                         var poly;
+                         var line_points;
+                         for (var i = 0; i < features.length; i++) {
+                            
+                            // console.log(features[i].geometry.coordinates[0]);
+                            poly = turf.polygon(features[i].geometry.coordinates);
+                            // console.log(point);
+                            // console.log(poly);
+
+                            // console.log(turf.inside(point, poly));
+                             if (turf.inside(point, poly)) {
+                                // console.log("match");
+                                line_points = [
                                             [xc-0.0002, yc+0.0002],
                                             [xc+0.0002, yc+0.0002],
                                             [xc+0.0002, yc-0.0002],
                                             [xc-0.0002, yc-0.0002]
                                             ];
+                                break;
+                                // alert("match");
+                             } else {
+                                line_points = [
+                                            [xc-0.0005, yc+0.0005],
+                                            [xc+0.0005, yc+0.0005],
+                                            [xc+0.0005, yc-0.0005],
+                                            [xc-0.0005, yc-0.0005]
+                                            ];
+                             }
+                         }
+
+                         
+                         
                         var polyline_options = {
                             color: '#404040'
                         };
                         // map.featureLayer.clearLayers();
                         // map.removeLayer(polyline);
+
+                        
                         if (first == 1) {
                             polyline = L.polygon(line_points, polyline_options);
+                            map.addLayer(polyline);
                             first = 0;
                         } else {
                             map.removeLayer(polyline)
