@@ -4,16 +4,27 @@
         <meta charset=utf-8 />
         <title>A simple map</title>
         <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
-        <script src='https://api.tiles.mapbox.com/mapbox.js/v2.2.4/mapbox.js'></script>
+        <script src='https://api.mapbox.com/mapbox.js/v2.4.0/mapbox.standalone.js'></script>
+        <!-- <link href='https://api.mapbox.com/mapbox.js/v2.4.0/mapbox.css' rel='stylesheet' /> -->
+        <!-- <script src='https://api.mapbox.com/mapbox.js/v2.4.0/mapbox.js'></script>
+        <link href='https://api.mapbox.com/mapbox.js/v2.4.0/mapbox.css' rel='stylesheet' /> -->
         <script src="jquery-1.12.1.min.js"></script>
         <script src="https://d3js.org/d3.v3.min.js" charset="utf-8"></script>
-        <link href='https://api.tiles.mapbox.com/mapbox.js/v2.2.4/mapbox.css' rel='stylesheet' />
+        <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.css" />
+        <script src="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.js"></script>
+
         <link href="http://code.jquery.com/ui/1.9.0/themes/cupertino/jquery-ui.css" rel="stylesheet" />
-        <script src="./papaparse.min.js"></script>
+        <!-- <script src="./papaparse.min.js"></script> -->
         <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
-        <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.20.1/mapbox-gl.js'></script>
+         <!-- <script src="leaflet.js"></script> -->
+        <!-- <script src="Leaflet.GeometryUtil/dist/leaflet.geometryutil.js"></script> -->
+        <!-- <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.20.1/mapbox-gl.js'></script> -->
         <script src="turf.min.js"></script>
         <script src="numeric-1.2.6.min.js"></script>
+        <script src="leaflet.snap.js"></script>
+        <script src="leaflet.geometryutil.js"></script>
+       <!--  <script src="http://makinacorpus.github.io/Leaflet.Snap/Leaflet.GeometryUtil/dist/leaflet.geometryutil.js"></script>
+        <script src="http://makinacorpus.github.io/Leaflet.Snap/leaflet.snap.js"></script> -->
 
         <style>
             body {
@@ -83,7 +94,8 @@
 
 
             L.mapbox.accessToken = 'pk.eyJ1Ijoic2hhbmVqb3NpYXMiLCJhIjoiY2lwczZwYzVkMDAxN2h0bTJ4M3Fpa3JzZyJ9.oJQvdNDebSyjfrhPOE2xAw';
-            var map = L.mapbox.map('map', 'shanejosias.0fm4hn5h');
+            var map = L.map('map', 'shanejosias.0fm4hn5h');
+            
 
             $( "#menu" ).selectable({
                 selected: function( event, ui ) {
@@ -109,6 +121,7 @@
                                         // console.log(point);
                                         var poly;
                                         var line_points;
+                                        var pts;
                                         for (var i = 0; i < features.length; i++) {
 
                                             poly = turf.polygon(features[i].geometry.coordinates);
@@ -136,18 +149,20 @@
                                                 // turf.remove(pts,"id", nearest1.properties.id);
                                                 // var nearest2 = turf.nearest(center, pts);
                                                 var a = turf.distance(center, nearest1);
-                                                var b = turf.distance(center, turf.point(line_points[1]));
-                                                var c = turf.distance(nearest1, turf.point(line_points[1]));
+                                                var b = turf.distance(center, turf.point([xc, yc + 4*relative]));
+                                                var c = turf.distance(nearest1, turf.point([xc, yc + 4*relative]));
 
-                                                var sum = a*a + b*b - c*c;
-                                                var frac = sum/(2*a*b);
+                                                var sum = -(a-b)*(a-b) +c*c;
+                                                var frac = sum/(4*a*b);
                                                 var theta;
-                                                if (center.geometry.coordinates[0] > nearest1.geometry.coordinates[0]) {
-                                                    theta = 180 -  Math.acos(frac);
-                                                } else {
-                                                    theta = Math.acos(frac);
-                                                }
+                                                // if (center.geometry.coordinates[0] > nearest1.geometry.coordinates[0]) {
+                                                //     theta = 360 -  Math.acos(frac);
+                                                // } else {
 
+                                                //     theta = Math.acos(frac);
+                                                // }
+                                                frac = Math.sqrt(frac);
+                                                theta = 360 - 2*Math.acos(frac);
                                                 // var hyp = turf.distance(center, nearest);
 
                                                 // var r_point = turf.point([nearest.geometry.coordinates[0],center.geometry.coordinates[1]]);
@@ -159,11 +174,11 @@
                                                         [diag, -n_diag],
                                                         [n_diag, diag]
                                                 ];
-                                                var vec1 = [-4*relative,2*relative];
-                                                var vec2 = [0,2*relative];
+                                                var vec1 = [0,0];
+                                                var vec2 = [0,4*relative];
 
-                                                var vec3 = [0,-2*relative];
-                                                var vec4 = [-4*relative,-2*relative];
+                                                var vec3 = [-4*relative,+4*relative];
+                                                var vec4 = [-4*relative,0];
 
 
                                                 var prod1 = numeric.dot(rot_mat, vec1);
@@ -186,9 +201,9 @@
 
                                                 line_points = [
                                                         [xc+prod1[0], yc+prod1[1]],
-                                                        [xc+prod2[0], yc+prod2[1]],
-                                                        [xc+prod3[0], yc+prod3[1]],
-                                                        [xc+prod4[0], yc+prod4[1]]
+                                                        [xc+prod2[0], yc+prod2[1]]
+                                                        // [xc+prod3[0], yc+prod3[1]],
+                                                        // [xc+prod4[0], yc+prod4[1]]
                                                 ];
 
 
@@ -197,10 +212,10 @@
                                             } else {
                                                 relative = 0.00005;
                                                 line_points = [
-                                                [xc-4*relative, yc+2*relative],
-                                                [xc, yc+2*relative],
-                                                [xc, yc-2*relative],
-                                                [xc-4*relative, yc-2*relative]
+                                                [xc, yc],
+                                                [xc, yc+4*relative]
+                                                // [xc-4*relative, yc+4*relative],
+                                                // [xc-4*relative, yc]
                                                 ];
                                             }
                                         }
@@ -218,8 +233,11 @@
                                             map.addLayer(polyline);
                                             first = 0;
                                         } else {
-                                            map.removeLayer(polyline)
+                                            map.removeLayer(polyline);
                                             polyline = L.polygon(line_points, polyline_options);
+                                            polyline.snapediting = new L.IHandler.PolylineSnap(map, polyline);
+                                            polyline.snapediting.addGuideLayer(pts);
+                                            polyline.snapediting.enable();
                                             map.addLayer(polyline);
                                         }   
                                     });
