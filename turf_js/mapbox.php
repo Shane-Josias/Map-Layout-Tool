@@ -99,6 +99,8 @@
                                     var first = 1;
                                     var relative = 0.0002;
                                     var features = map.featureLayer._geojson.features;
+                                    // map.featureLayer._geojson.features = undefined;
+                                    // features = undefined;
 
                                     map.on('mousemove', function(e) {
 
@@ -114,6 +116,7 @@
                                         for (var i = 0; i < features.length; i++) {
 
                                             poly = turf.polygon(features[i].geometry.coordinates);
+                                            console.log(poly);
                                             if (turf.inside(center, poly)) {
 
                                                 var ptsArr = []
@@ -131,200 +134,139 @@
 
                                                 var before;
                                                 var after;
-                                                ptsArr = []
+                                                // ptsArr = []
                                                 val = 0;
-                                                for (var j = 0; j < poly.geometry.coordinates[0].length; j++) {
-                                                    // Potential out of bounds here!!!!!
-                                                    if (val == nearest1.properties.id) {
-                                                         console.log(val);
+                                                
+                                                var index;
+                                                var theta_deg;
+                                                var intersection_pts_array = [];
+                                                var minimum_index = 0;
+                                                var minimum_distance = Number.MAX_VALUE;
+                                                for (index=0; index*30 < 360; index++) {
 
-                                                        if (val == 0) {
-                                                            before = turf.point(poly.geometry.coordinates[0][poly.geometry.coordinates[0].length - 1]);
-                                                        } else {
-                                                           before = turf.point(poly.geometry.coordinates[0][val-1]); 
-                                                        }
-                                                        
-                                                        if (val == poly.geometry.coordinates[0].length - 1) {
-                                                             after = turf.point(poly.geometry.coordinates[0][0]);
-                                                        } else {
-                                                             after = turf.point(poly.geometry.coordinates[0][val+1])
-                                                        }
-                                                        
-                                                        break;
-                                                    }
-                                                    val+=1;
-                                                }
-
-                                                // consorf.featurecollection(ptsArr);
-
-                                                var d1 = turf.distance(nearest1, before);
-                                                var d2 = turf.distance(nearest1, after);
-                                                var nearest2;
-                                                // bearing calculations
-                                                var bearing_nearest = turf.bearing(center, nearest1);
-                                                var bearing_before = turf.bearing(center, before);
-                                                var bearing_after = turf.bearing(center, after);
-                                                var bearing_np = turf.bearing(center, turf.point(line_points2[1]));
-
-                                                // top line
-                                                if ((bearing_nearest >= -180) && (bearing_nearest <=0) && (bearing_after <= 180) && (bearing_after >= 0)) {
-                                                    line_snappee = turf.linestring([new Array(nearest1.geometry.coordinates[0],nearest1.geometry.coordinates[1]), new Array(after.geometry.coordinates[0],after.geometry.coordinates[1])]);
-                                                        nearest2 = after;
-                                                        bearing_np += 90;
-
-                                                } else if ((bearing_nearest >= 0) && (bearing_nearest <= 180) && (bearing_before > -180) && (bearing_before <0)) {
-                                                    line_snappee = turf.linestring([new Array(nearest1.geometry.coordinates[0],nearest1.geometry.coordinates[1]), new Array(before.geometry.coordinates[0],before.geometry.coordinates[1])]);
-                                                        nearest2 = before;
-                                                        bearing_np += 90;
-
-                                                }
-
-                                                // bottom line
-                                                if ((bearing_nearest >= 0) && (bearing_nearest <=180) && (bearing_after <= 0) && (bearing_after >= -180)) {
-                                                    line_snappee = turf.linestring([new Array(nearest1.geometry.coordinates[0],nearest1.geometry.coordinates[1]), new Array(after.geometry.coordinates[0],after.geometry.coordinates[1])]);
-                                                        nearest2 = after;
-                                                        bearing_np -= 90;
-
-
-                                                } else if ((bearing_nearest <= 0) && (bearing_nearest >= -180) && (bearing_before > 0) && (bearing_before <180)) {
-                                                    line_snappee = turf.linestring([new Array(nearest1.geometry.coordinates[0],nearest1.geometry.coordinates[1]), new Array(before.geometry.coordinates[0],before.geometry.coordinates[1])]);
-                                                        nearest2 = before;
-                                                        bearing_np -= 90;
-
-                                                }
-
-                                                // if its to the right corresponds to all bearings negative HERE can be null pointer exceptions too
-                                                if (bearing_nearest < 0 && bearing_before < 0 && bearing_after < 0) {
-                                                    if (bearing_nearest > -90 ) {
-                                                        nearest1 = after;
-                                                        //we actually changed after
-                                                        if ( val == poly.geometry.coordinates[0].length - 1) {
-                                                            nearest2 = turf.point(poly.geometry.coordinates[0][1]);
-                                                        } else if ( val == poly.geometry.coordinates[0].length - 2) {
-                                                            nearest2 = turf.point(poly.geometry.coordinates[0][0]);
-                                                        } else {
-                                                            nearest2 = turf.point(poly.geometry.coordinates[0][val + 2]);
-                                                        }
-                                                    } else {
-                                                        nearest1 = before;
-                                                        // we actually changed before
-                                                        if (val == 0) {
-                                                            nearest2 = turf.point(poly.geometry.coordinates[0][poly.geometry.coordinates[0].length - 2]);
-                                                        } else if (val == 1) {
-                                                            nearest2 = turf.point(poly.geometry.coordinates[0][poly.geometry.coordinates[0].length - 1]);
-                                                        } else {
-                                                            nearest2 = turf.point(poly.geometry.coordinates[0][val - 2]);
-
-                                                        }
-                                                    }
+                                                
+                                                    // console.log(index);
+                                                    // theta_deg = 30*index - 360;
                                                     
-                                                    bearing_np += 90;
+                                                    theta_deg = 30*index;
+                                                    
 
-                                                    line_snappee = turf.linestring([new Array(nearest1.geometry.coordinates[0],nearest1.geometry.coordinates[1]), new Array(nearest2.geometry.coordinates[0],nearest2.geometry.coordinates[1])]);
+                                                    // console.log(bearing_np);
 
-                                                } else if (bearing_nearest > 0 && bearing_before > 0 && bearing_after > 0) {
+                                                    var theta_rad = (Math.PI*theta_deg)/180;
+                                                    var la1 = (Math.PI*yc)/180;
+                                                    var lo1 = (Math.PI*xc)/180;
+                                                    var d = 0;
+                                                    var R = 6371;
+                                                    var Ad = d/R;
+                                                    
+                                                    var la2 = Math.asin(Math.sin(la1)*Math.cos(Ad) + Math.cos(la1)*Math.sin(Ad)*Math.cos(theta_rad));
+                                                    var lo2 = lo1 + Math.atan2(Math.sin(theta_rad)*Math.sin(Ad)*Math.cos(la1), Math.cos(Ad)-Math.sin(la1)*Math.sin(la2));
+                                                    var lat2 = la2 * (180/Math.PI);
+                                                    var lon2 = lo2 * (180/Math.PI);
 
-                                                    if (bearing_nearest > 90 ) {
-                                                        nearest1 = before;
-                                                        // we actually changed before
-                                                        if (val == 0) {
-                                                            nearest2 = turf.point(poly.geometry.coordinates[0][poly.geometry.coordinates[0].length - 2]);
-                                                        } else if (val == 1) {
-                                                            nearest2 = turf.point(poly.geometry.coordinates[0][poly.geometry.coordinates[0].length - 1]);
-                                                        } else {
-                                                            nearest2 = turf.point(poly.geometry.coordinates[0][val - 2]);
-                                                        }
+                                                    // console.log([lon2,lat2]);
 
-                                                    } else {
-                                                        nearest1 = after;
-                                                        // we actually changed after
-                                                        if ( val == poly.geometry.coordinates[0].length - 1) {
-                                                            nearest2 = turf.point(poly.geometry.coordinates[0][1]);
-                                                        } else if ( val == poly.geometry.coordinates[0].length - 2) {
-                                                            nearest2 = turf.point(poly.geometry.coordinates[0][0]);
-                                                        } else {
-                                                            nearest2 = turf.point(poly.geometry.coordinates[0][val + 2]);
-                                                        }
+                                                    var test_line = turf.linestring([[yc,xc],[lon2,lat2]]);
+                                                    // console.log(test_line);
+                                                    var intersect = turf.intersect(test_line,poly);
+                                                    // console.log(intersect);
+                                                    var point_intersection = turf.point(intersect.geometry.coordinates[1]);
+                                                    var dist = turf.distance(center, point_intersection);
+                                                    intersection_pts_array.push(intersect);
+
+                                                    var point1 = intersection_pts_array[index].geometry.coordinates[0];
+                                                    var point2 = intersection_pts_array[index].geometry.coordinates[1];
+                                                    console.log(test_line.geometry.coordinates[1]);
+                                                     line_points = [
+                                                        [test_line.geometry.coordinates[0]]
+                                                        // [test_line.geometry.coordinates[1]]
+                                                        // [lat2, lon2]
+                                                        // [xc-4*relative, yc]
+                                                    ];
+
+                                                    polyline = L.polygon(line_points, polyline_options);
+                                                    map.addLayer(polyline);
+
+                                                    if (dist < minimum_distance) {
+                                                        minimum_index = index;
+                                                        minimum_distance = dist;
+                                                        // console.log(minimum_distance);
                                                     }
-                                                    bearing_np -= 90;
-
-                                                    line_snappee = turf.linestring([new Array(nearest1.geometry.coordinates[0],nearest1.geometry.coordinates[1]), new Array(nearest2.geometry.coordinates[0],nearest2.geometry.coordinates[1])]);
-
                                                 }
 
+                                                // console.log(intersection_pts_array);
+
+                                                // console.log(minimum_index);
+
+
+                                                 // var test_line = turf.linestring([line_points2[0], line_points2[1], line_points2[0]]);
+                                                 // console.log(test_line);
+                                                 // var intersect = turf.intersect(test_line,poly);
+                                                 // console.log(intersect);
+                                                 // console.log('----------');
+                                                // bearing calculations
 
                                                
 
-                                                var a = turf.distance(nearest1, center);
-                                                var b = turf.distance(nearest1, nearest2);
-                                                var c = turf.distance(center, nearest2);
-                                                var frontage_distance = turf.distance(center, turf.point(line_points2[1]));
-                                                console.log('a ' + a);
-                                                console.log('b ' + b);
-
-                                                console.log('c ' + c);
-                                                console.log('frontage ' +frontage_distance);
-
-
-
-                                                var numerator = a*a + b*b - c*c;
-                                                var cos_theta = numerator/(2*a*b);
-                                                var proj_distance = a*cos_theta;
-                                                console.log('proj distance ' + proj_distance);
-                                                var p1 = turf.along(line_snappee, Math.abs(proj_distance), 'kilometers');
-                                                var p2 = turf.along(line_snappee,Math.abs(proj_distance) + Math.abs(frontage_distance), 'kilometers');
-
-                    
-
+                                                // var bearing_np_radians = (Math.PI*bearing_np)/180;
+                                                // var la1 = (Math.PI*p1.geometry.coordinates[1])/180;
+                                                // var lo1 = (Math.PI*p1.geometry.coordinates[0])/180;
+                                                // var d = frontage_distance;
+                                                // var R = 6371;
+                                                // var Ad = d/R;
                                                 
+                                                // var la2 = Math.asin(Math.sin(la1)*Math.cos(Ad) + Math.cos(la1)*Math.sin(Ad)*Math.cos(bearing_np_radians));
+                                                // var lo2 = lo1 + Math.atan2(Math.sin(bearing_np_radians)*Math.sin(Ad)*Math.cos(la1), Math.cos(Ad)-Math.sin(la1)*Math.sin(la2));
+                                                // var lat2 = la2 * (180/Math.PI);
+                                                // var lon2 = lo2 * (180/Math.PI);
 
-                                               
-
-                                                var bearing_np_radians = (Math.PI*bearing_np)/180;
-                                                var la1 = (Math.PI*p1.geometry.coordinates[1])/180;
-                                                var lo1 = (Math.PI*p1.geometry.coordinates[0])/180;
-                                                var d = frontage_distance;
-                                                var R = 6371;
-                                                var Ad = d/R;
-                                                
-                                                var la2 = Math.asin(Math.sin(la1)*Math.cos(Ad) + Math.cos(la1)*Math.sin(Ad)*Math.cos(bearing_np_radians));
-                                                var lo2 = lo1 + Math.atan2(Math.sin(bearing_np_radians)*Math.sin(Ad)*Math.cos(la1), Math.cos(Ad)-Math.sin(la1)*Math.sin(la2));
-                                                var lat2 = la2 * (180/Math.PI);
-                                                var lon2 = lo2 * (180/Math.PI);
+                                                // console.log(intersection_pts_array);
 
 
+                                                var point1 = intersection_pts_array[minimum_index].geometry.coordinates[0];
+                                                var point2 = intersection_pts_array[minimum_index].geometry.coordinates[1];
 
+                                                // console.log(point1);
 
-
-
-                                                line_points = [
-                                                    [p1.geometry.coordinates[1],p1.geometry.coordinates[0] ], 
-                                                    [p2.geometry.coordinates[1],p2.geometry.coordinates[0]],
-                                                    [lat2, lon2]
-                                                    // [xc-4*relative, yc]
-                                                ];
-                                                line_points2 = [
-                                                    [p1.geometry.coordinates[0],p1.geometry.coordinates[1] ], 
-                                                    [p2.geometry.coordinates[0],p2.geometry.coordinates[1] ],
-                                                    [lon2, lat2]
-                                                    // [xc-4*relative, yc]
-                                                ];
-
-
+                                                // line_points = [
+                                                //     [point1[1],point1[0] ], 
+                                                //     [point2[1],point2[0]],
+                                                //     // [lat2, lon2]
+                                                //     // [xc-4*relative, yc]
+                                                // ];
+                                                // line_points2 = [
+                                                //     [point.geometry.coordinates[0], point.geometry.coordinates[1]  ], 
+                                                //     // [p2.geometry.coordinates[0],p2.geometry.coordinates[1] ],
+                                                //     // [lon2, lat2]
+                                                //     // [xc-4*relative, yc]
+                                                // ];
+                                                // line_points = [
+                                                //     [xc, yc-2*relative],
+                                                //     [xc, yc + 2*relative]
+                                                //     // [xc + 4*relative, yc+4*relative]
+                                                //     // [xc-4*relative, yc]
+                                                // ];
+                                                // line_points2 = [
+                                                //     [yc-2*relative, xc],
+                                                //     [yc+2*relative, xc ]
+                                                //     // [yc + 4*relative, xc + 4*relative]
+                                                //     // [xc-4*relative, yc]
+                                                // ];
                                                 
                                                 break;
                                             } else {
-                                                relative = 0.0005;
+                                                relative = 0.00005;
                                                 
                                                 line_points = [
-                                                    [xc, yc],
-                                                    [xc, yc + 4*relative]
+                                                    [xc, yc-2*relative],
+                                                    [xc, yc + 2*relative]
                                                     // [xc + 4*relative, yc+4*relative]
                                                     // [xc-4*relative, yc]
                                                 ];
                                                 line_points2 = [
-                                                    [yc, xc],
-                                                    [yc + 4*relative, xc ]
+                                                    [yc-2*relative, xc],
+                                                    [yc+2*relative, xc ]
                                                     // [yc + 4*relative, xc + 4*relative]
                                                     // [xc-4*relative, yc]
                                                 ];
