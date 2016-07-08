@@ -1,0 +1,26 @@
+{
+    "version": 8,
+    "name": "Empty",
+    "metadata": {
+        "mapbox:autocomposite": true,
+        "mapbox:type": "template"
+    },
+    "sources": {},
+    "sprite": "mapbox://sprites/shanejosias/ciq810yxh007sdvm4f1dyuddd",
+    "glyphs": "mapbox://fonts/mapbox/{fontstack}/{range}.pbf",
+    "layers": [
+        {
+            "id": "background",
+            "type": "background",
+            "interactive": true,
+            "paint": {
+                "background-color": "rgba(0,0,0,0)"
+            }
+        }
+    ],
+    "created": "2016-07-04T12:52:28.770Z",
+    "id": "ciq810yxh007sdvm4f1dyuddd",
+    "modified": "2016-07-04T12:52:28.770Z",
+    "owner": "shanejosias",
+    "draft": false
+}
