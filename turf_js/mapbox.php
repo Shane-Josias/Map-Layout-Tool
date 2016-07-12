@@ -5,6 +5,8 @@
         <title>A simple map</title>
         <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
         <script src='https://api.mapbox.com/mapbox.js/v2.4.0/mapbox.js'></script>
+        <script src='//api.tiles.mapbox.com/mapbox.js/plugins/leaflet-image/v0.0.4/leaflet-image.js'></script>
+
         <link href='https://api.mapbox.com/mapbox.js/v2.4.0/mapbox.css' rel='stylesheet' />
         <script src="jquery-1.12.1.min.js"></script>
         <script src="https://d3js.org/d3.v3.min.js" charset="utf-8"></script>
@@ -107,7 +109,7 @@
                                         var xc = e.latlng.lat;
                                         var yc = e.latlng.lng;
                                         var center = turf.point([yc,xc]);
-                                        // console.log(e );
+                                        // console.log(yc );
                                         var poly;
                                         var line_points;
                                         var line_points2;
@@ -116,143 +118,59 @@
                                         for (var i = 0; i < features.length; i++) {
 
                                             poly = turf.polygon(features[i].geometry.coordinates);
-                                            console.log(poly);
+                                            // console.log(poly);
                                             if (turf.inside(center, poly)) {
 
-                                                var ptsArr = []
-                                                var val = 0;
-                                                for (var j = 0; j < poly.geometry.coordinates[0].length; j++) {
-                                                    var one = poly.geometry.coordinates[0][j][0];
-                                                    var two = poly.geometry.coordinates[0][j][1];
-                                                    // console.log(one);
-                                                    ptsArr.push(turf.point([one, two], { id: val}));
-                                                    val+=1;
+                                                var points_arr = []
+                                                points_arr.push(poly.geometry.coordinates[0][0]);
+                                                for (var j = 1; j < poly.geometry.coordinates[0].length-1; j++) {
+                                                    one1 = poly.geometry.coordinates[0][j-1][0];
+                                                    one2 = poly.geometry.coordinates[0][j-1][1];
+                                                    
+                                                    
+
+                                                    points_arr.push([one1, one2]);
+                                                    
+                                                }
+                                                points_arr.push(poly.geometry.coordinates[0][poly.geometry.coordinates[0].length-2]);
+                                                points_arr.push(poly.geometry.coordinates[0][poly.geometry.coordinates[0].length-1]);
+
+
+                                                var bigLine = turf.linestring(points_arr);
+                                                // console.log(bigLine);
+
+                                                
+
+                                                
+
+                                                var snapped = turf.pointOnLine(bigLine, center);
+                                                // var point1 = intersection_pts_array[minimum_index].geometry.coordinates;
+                                                var point1 = snapped.geometry.coordinates
+                                                // console.log(snapped2);
+                                                var bPoint = turf.point(bigLine.geometry.coordinates[0]);
+                                                var slice = turf.lineSlice(bPoint, snapped, bigLine);
+                                                var first_dist = turf.lineDistance(slice);
+
+                                                var p2 = turf.along(bigLine, (first_dist+0.03), 'kilometers');                                                
+                                                // var point2 = p2.geometry.coordinates;
+                                                var slice2 = turf.lineSlice(snapped, p2, bigLine);
+                                                // console.log(slice2);
+                                                var point2 = slice2.geometry.coordinates;
+                                                console.log(point2);
+                                                line_points = [];
+                                                for (var k = 0; k < point2.length; k++ ){
+                                                    line_points.push([point2[k][1], point2[k][0]]);
+
                                                 }
 
-                                                pts  = turf.featurecollection(ptsArr);
-                                                var nearest1 = turf.nearest(center, pts);
-
-                                                var before;
-                                                var after;
-                                                // ptsArr = []
-                                                val = 0;
-                                                
-                                                var index;
-                                                var theta_deg;
-                                                var intersection_pts_array = [];
-                                                var minimum_index = 0;
-                                                var minimum_distance = Number.MAX_VALUE;
-                                                for (index=0; index*30 < 360; index++) {
-
-                                                
-                                                    // console.log(index);
-                                                    // theta_deg = 30*index - 360;
-                                                    
-                                                    theta_deg = 30*index;
-                                                    
-
-                                                    // console.log(bearing_np);
-
-                                                    var theta_rad = (Math.PI*theta_deg)/180;
-                                                    var la1 = (Math.PI*yc)/180;
-                                                    var lo1 = (Math.PI*xc)/180;
-                                                    var d = 0;
-                                                    var R = 6371;
-                                                    var Ad = d/R;
-                                                    
-                                                    var la2 = Math.asin(Math.sin(la1)*Math.cos(Ad) + Math.cos(la1)*Math.sin(Ad)*Math.cos(theta_rad));
-                                                    var lo2 = lo1 + Math.atan2(Math.sin(theta_rad)*Math.sin(Ad)*Math.cos(la1), Math.cos(Ad)-Math.sin(la1)*Math.sin(la2));
-                                                    var lat2 = la2 * (180/Math.PI);
-                                                    var lon2 = lo2 * (180/Math.PI);
-
-                                                    // console.log([lon2,lat2]);
-
-                                                    var test_line = turf.linestring([[yc,xc],[lon2,lat2]]);
-                                                    // console.log(test_line);
-                                                    var intersect = turf.intersect(test_line,poly);
-                                                    // console.log(intersect);
-                                                    var point_intersection = turf.point(intersect.geometry.coordinates[1]);
-                                                    var dist = turf.distance(center, point_intersection);
-                                                    intersection_pts_array.push(intersect);
-
-                                                    var point1 = intersection_pts_array[index].geometry.coordinates[0];
-                                                    var point2 = intersection_pts_array[index].geometry.coordinates[1];
-                                                    console.log(test_line.geometry.coordinates[1]);
-                                                     line_points = [
-                                                        [test_line.geometry.coordinates[0]]
-                                                        // [test_line.geometry.coordinates[1]]
-                                                        // [lat2, lon2]
-                                                        // [xc-4*relative, yc]
-                                                    ];
-
-                                                    polyline = L.polygon(line_points, polyline_options);
-                                                    map.addLayer(polyline);
-
-                                                    if (dist < minimum_distance) {
-                                                        minimum_index = index;
-                                                        minimum_distance = dist;
-                                                        // console.log(minimum_distance);
-                                                    }
-                                                }
-
-                                                // console.log(intersection_pts_array);
-
-                                                // console.log(minimum_index);
-
-
-                                                 // var test_line = turf.linestring([line_points2[0], line_points2[1], line_points2[0]]);
-                                                 // console.log(test_line);
-                                                 // var intersect = turf.intersect(test_line,poly);
-                                                 // console.log(intersect);
-                                                 // console.log('----------');
-                                                // bearing calculations
-
-                                               
-
-                                                // var bearing_np_radians = (Math.PI*bearing_np)/180;
-                                                // var la1 = (Math.PI*p1.geometry.coordinates[1])/180;
-                                                // var lo1 = (Math.PI*p1.geometry.coordinates[0])/180;
-                                                // var d = frontage_distance;
-                                                // var R = 6371;
-                                                // var Ad = d/R;
-                                                
-                                                // var la2 = Math.asin(Math.sin(la1)*Math.cos(Ad) + Math.cos(la1)*Math.sin(Ad)*Math.cos(bearing_np_radians));
-                                                // var lo2 = lo1 + Math.atan2(Math.sin(bearing_np_radians)*Math.sin(Ad)*Math.cos(la1), Math.cos(Ad)-Math.sin(la1)*Math.sin(la2));
-                                                // var lat2 = la2 * (180/Math.PI);
-                                                // var lon2 = lo2 * (180/Math.PI);
-
-                                                // console.log(intersection_pts_array);
-
-
-                                                var point1 = intersection_pts_array[minimum_index].geometry.coordinates[0];
-                                                var point2 = intersection_pts_array[minimum_index].geometry.coordinates[1];
-
-                                                // console.log(point1);
-
+                                                console.log(line_points);
                                                 // line_points = [
-                                                //     [point1[1],point1[0] ], 
-                                                //     [point2[1],point2[0]],
+                                                //     [point1[1],point1[0]], 
+                                                //     [point2[1],point2[0]]
                                                 //     // [lat2, lon2]
                                                 //     // [xc-4*relative, yc]
                                                 // ];
-                                                // line_points2 = [
-                                                //     [point.geometry.coordinates[0], point.geometry.coordinates[1]  ], 
-                                                //     // [p2.geometry.coordinates[0],p2.geometry.coordinates[1] ],
-                                                //     // [lon2, lat2]
-                                                //     // [xc-4*relative, yc]
-                                                // ];
-                                                // line_points = [
-                                                //     [xc, yc-2*relative],
-                                                //     [xc, yc + 2*relative]
-                                                //     // [xc + 4*relative, yc+4*relative]
-                                                //     // [xc-4*relative, yc]
-                                                // ];
-                                                // line_points2 = [
-                                                //     [yc-2*relative, xc],
-                                                //     [yc+2*relative, xc ]
-                                                //     // [yc + 4*relative, xc + 4*relative]
-                                                //     // [xc-4*relative, yc]
-                                                // ];
+                                                
                                                 
                                                 break;
                                             } else {
@@ -284,12 +202,12 @@
 
 
                                         if (first == 1) {
-                                            polyline = L.polygon(line_points, polyline_options);
+                                            polyline = L.polyline(line_points, polyline_options);
                                             map.addLayer(polyline);
                                             first = 0;
                                         } else {
                                             map.removeLayer(polyline);
-                                            polyline = L.polygon(line_points, polyline_options);
+                                            polyline = L.polyline(line_points, polyline_options);
                                             map.addLayer(polyline);
                                         }   
                                     });
@@ -301,6 +219,17 @@
             });
 
             $( "#menu" ).on("selectableselected", function( event, ui ) {} );
+            leafletImage(map, function(err, canvas) {
+                // now you have canvas
+                // example thing to do with that canvas:
+                var img = document.createElement('img');
+                var dimensions = map.getSize();
+                img.width = dimensions.x;
+                img.height = dimensions.y;
+                img.src = canvas.toDataURL();
+                document.getElementById('images').innerHTML = '';
+                document.getElementById('images').appendChild(img);
+            });
 
         </script>
     </body>

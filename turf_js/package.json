@@ -1,0 +1,15 @@
+{
+  "name": "turf_js",
+  "version": "1.0.0",
+  "description": "Description",
+  "main": "mapbox.php",
+  "scripts": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "none"
+  },
+  "author": "Shane Josias",
+  "license": "MIT"
+}
