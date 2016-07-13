@@ -85,7 +85,7 @@
                 echo '</ul>';
 
             ?>
-            <button id="printBtn">Print map</button>
+            <button id="printBtn">Save map</button>
         </div>
         <div id='map' class='map pad2'>Map</div>
         <script type= "text/javascript">
@@ -94,7 +94,12 @@
             L.mapbox.accessToken = 'pk.eyJ1Ijoic2hhbmVqb3NpYXMiLCJhIjoiY2lwczZwYzVkMDAxN2h0bTJ4M3Fpa3JzZyJ9.oJQvdNDebSyjfrhPOE2xAw';
             var map = L.mapbox.map('map', 'shanejosias.0fm4hn5h');
             var remove = true;
+            var featureLayer = map.featureLayer._geojson;
+            var featureGroup;
+            var featuresList = [];
             console.log(map);
+            var geo;
+            var first2 = 0;
             $( "#menu" ).selectable({
                 selected: function( event, ui ) {
                             $( ".ui-selected", this ).each(function() {
@@ -109,10 +114,15 @@
                                     var first = 1;
                                     var relative = 0.0002;
                                     var features = map.featureLayer._geojson.features;
+                                    console.log(map.featureLayer._geojson.features);
                                     // map.featureLayer._geojson.features = undefined;
                                     // features = undefined;
-                                    map.on('dblclick', function(e) {
+                                    map.on('click', function(e) {
+                                        
                                         remove = false;
+                                        // featureGroup = L.featureGroup([featuresList]).addTo(map);
+                                       // console.log(added_features);
+
                                     });
                                     map.on('mousemove', function(e) {
 
