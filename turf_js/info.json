@@ -1,0 +1,26 @@
+var printConfig = {
+    "scales":[
+        {"name":"25000"},
+        {"name":"50000"},
+        {"name":"100000"}
+    ],
+    "dpis":[
+        {"name":"190"},
+        {"name":"254"}
+    ],
+    "outputFormats":[
+        {"name":"pdf"},
+        {"name":"png"}
+    ],
+    "layouts":[
+        {
+            "name":"A4 portrait",
+            "map":{
+                "width":440,
+                "height":483
+            }
+        }
+    ],
+    "printURL":"http:\/\/localhost\/turf_js\/print.pdf",
+    "createURL":"http:\/\/localhost\/turf_js\/create.json"
+}

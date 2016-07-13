@@ -6,9 +6,16 @@
         <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
         <script src='https://api.mapbox.com/mapbox.js/v2.4.0/mapbox.js'></script>
         <script src='//api.tiles.mapbox.com/mapbox.js/plugins/leaflet-image/v0.0.4/leaflet-image.js'></script>
-
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+        <script src="http://www.jqueryscript.net/demo/jQuery-Plugin-To-Print-Any-Part-Of-Your-Page-Print/jQuery.print.js"></script>
+        <link rel="stylesheet" href="leaflet.print.css"/>
+        <script src="leaflet.print.js"></script>
+        <!-- <script type="text/javascript" src="localhost/turf_js/info.json?var=printConfig"></script> -->
+        <!-- <script src="http://apps2.geosmart.co.nz/mapfish-print/pdf/info.json?var=printConfig"></script> -->
+            <!-- <link rel="stylesheet" href="dist/easyPrint.css"/> -->
+    <!-- <script src="leaflet.easyPrint.js"></script> -->
         <link href='https://api.mapbox.com/mapbox.js/v2.4.0/mapbox.css' rel='stylesheet' />
-        <script src="jquery-1.12.1.min.js"></script>
+        <!-- <script src="jquery-1.12.1.min.js"></script> -->
         <script src="https://d3js.org/d3.v3.min.js" charset="utf-8"></script>
         <link href="http://code.jquery.com/ui/1.9.0/themes/cupertino/jquery-ui.css" rel="stylesheet" />
         <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
@@ -57,7 +64,7 @@
 
     <body>
 
-        <div id class='sidebar pad2'>Campers
+        <div id='side' class='sidebar pad2'>Campers
 
             <?php
                 $file = fopen("campers.csv","r");
@@ -78,6 +85,7 @@
                 echo '</ul>';
 
             ?>
+            <button id="printBtn">Print map</button>
         </div>
         <div id='map' class='map pad2'>Map</div>
         <script type= "text/javascript">
@@ -85,8 +93,8 @@
 
             L.mapbox.accessToken = 'pk.eyJ1Ijoic2hhbmVqb3NpYXMiLCJhIjoiY2lwczZwYzVkMDAxN2h0bTJ4M3Fpa3JzZyJ9.oJQvdNDebSyjfrhPOE2xAw';
             var map = L.mapbox.map('map', 'shanejosias.0fm4hn5h');
-            
-
+            var remove = true;
+            console.log(map);
             $( "#menu" ).selectable({
                 selected: function( event, ui ) {
                             $( ".ui-selected", this ).each(function() {
@@ -103,7 +111,9 @@
                                     var features = map.featureLayer._geojson.features;
                                     // map.featureLayer._geojson.features = undefined;
                                     // features = undefined;
-
+                                    map.on('dblclick', function(e) {
+                                        remove = false;
+                                    });
                                     map.on('mousemove', function(e) {
 
                                         var xc = e.latlng.lat;
@@ -156,14 +166,43 @@
                                                 var slice2 = turf.lineSlice(snapped, p2, bigLine);
                                                 // console.log(slice2);
                                                 var point2 = slice2.geometry.coordinates;
-                                                console.log(point2);
+                                                // console.log(point2[]);
                                                 line_points = [];
+
                                                 for (var k = 0; k < point2.length; k++ ){
                                                     line_points.push([point2[k][1], point2[k][0]]);
 
                                                 }
+                                                var line_start = turf.point([point2[0][0], point2[0][1] ]);
+                                                var line_end =  turf.point([point2[point2.length-1][0], point2[point2.length-1][1] ]);
+                                                var angle = turf.bearing(line_start,line_end);
+                                                var angle2 = angle+90;
 
-                                                console.log(line_points);
+                                                var c2 = turf.destination(line_start,0.03,angle2,'kilometers');
+                                                var c3 = turf.destination(line_end,0.03,angle2,'kilometers');
+                                                if (!turf.inside(c2,poly)) {
+                                                    c2 = turf.pointOnLine(bigLine, c2);
+                                                } 
+                                                if(!turf.inside(c3,poly)) {
+                                                    c3= turf.pointOnLine(bigLine, c3);
+
+                                                }
+                                                line_points.push([c3.geometry.coordinates[1], c3.geometry.coordinates[0]]);
+
+                                                line_points.push([c2.geometry.coordinates[1], c2.geometry.coordinates[0]]);
+                                                line_points.push([c2.geometry.coordinates[1], c2.geometry.coordinates[0]]);
+                                                line_points.push([point2[0][1], point2[0][0]]);
+
+
+
+
+
+
+
+
+
+
+                                                // console.log(line_points);
                                                 // line_points = [
                                                 //     [point1[1],point1[0]], 
                                                 //     [point2[1],point2[0]]
@@ -206,7 +245,12 @@
                                             map.addLayer(polyline);
                                             first = 0;
                                         } else {
-                                            map.removeLayer(polyline);
+                                            if (remove) {
+                                                map.removeLayer(polyline);
+                                            } else {
+                                                remove = true;
+                                                console.log(map);
+                                            }
                                             polyline = L.polyline(line_points, polyline_options);
                                             map.addLayer(polyline);
                                         }   
@@ -219,17 +263,57 @@
             });
 
             $( "#menu" ).on("selectableselected", function( event, ui ) {} );
-            leafletImage(map, function(err, canvas) {
-                // now you have canvas
-                // example thing to do with that canvas:
-                var img = document.createElement('img');
-                var dimensions = map.getSize();
-                img.width = dimensions.x;
-                img.height = dimensions.y;
-                img.src = canvas.toDataURL();
-                document.getElementById('images').innerHTML = '';
-                document.getElementById('images').appendChild(img);
+            $("#printBtn").click(function(){
+              $('#map').print();
             });
+            // L.easyPrint({
+            //     title: 'My awesome print button',
+            //     elementsToHide: '#side, ul, li, #printBtn'
+            // }).addTo(map)
+
+            //  var printConfig = {
+            //     "scales":[
+            //         {"name":"25000"},
+            //         {"name":"50000"},
+            //         {"name":"100000"}
+            //     ],
+            //     "dpis":[
+            //         {"name":"190"},
+            //         {"name":"254"}
+            //     ],
+            //     "outputFormats":[
+            //         {"name":"pdf"},
+            //         {"name":"png"}
+            //     ],
+            //     "layouts":[
+            //         {
+            //             "name":"A4 portrait",
+            //             "map":{
+            //                 "width":440,
+            //                 "height":483
+            //             }
+            //         }
+            //     ],
+            //     "printURL":"http:\/\/localhost\/turf_js\/print.pdf",
+            //     "createURL":"http:\/\/localhost\/turf_js\/create.json"
+            // }
+      
+            //  printProvider = L.print.provider({
+            //       capabilities: printConfig,
+            //       method: 'GET',
+            //       dpi: 190,
+            //       outputFormat: 'pdf',
+            //       customParams: {
+            //           mapTitle: 'Print Test',
+            //           comment: 'Testing Leaflet printing'
+            //       }
+            //   });
+            // // Create a print control with the configured provider and add to the map
+            //   printControl = L.control.print({
+            //       provider: printProvider
+            //   });
+            //   map.addControl(printControl);
+            
 
         </script>
     </body>
