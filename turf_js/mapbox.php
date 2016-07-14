@@ -10,6 +10,8 @@
         <script src="http://www.jqueryscript.net/demo/jQuery-Plugin-To-Print-Any-Part-Of-Your-Page-Print/jQuery.print.js"></script>
         <link rel="stylesheet" href="leaflet.print.css"/>
         <script src="leaflet.print.js"></script>
+        <script src='https://api.mapbox.com/mapbox.js/plugins/leaflet-label/v0.2.1/leaflet.label.js'></script>
+        <link href='https://api.mapbox.com/mapbox.js/plugins/leaflet-label/v0.2.1/leaflet.label.css' rel='stylesheet' />
         <link href='https://api.mapbox.com/mapbox.js/plugins/leaflet-draw/v0.2.3/leaflet.draw.css' rel='stylesheet' />
         <script src='https://api.mapbox.com/mapbox.js/plugins/leaflet-draw/v0.2.3/leaflet.draw.js'></script>
         <!-- <script type="text/javascript" src="localhost/turf_js/info.json?var=printConfig"></script> -->
@@ -98,9 +100,10 @@
             var remove = true;
             var featureLayer = map.featureLayer._geojson;
             var featureGroup = L.featureGroup().addTo(map);
-
+            var line_points;
+            var polyline_options;
             var featuresList = [];
-            console.log(map);
+            console.log();
             var geo;
             var first2 = 0;
             var first = 1;
@@ -112,7 +115,6 @@
                 // console.log(yc );
                 var features = map.featureLayer._geojson.features;
                 var poly;
-                var line_points;
                 var line_points2;
 
                 var pts;
@@ -178,6 +180,40 @@
                             c3= turf.pointOnLine(bigLine, c3);
 
                         }
+                        // var featureGroupLayers = featureGroup._layers;
+                        // if (!$.isEmptyObject(featureGroupLayers)) {
+
+                        //     for (var e in featureGroupLayers) {
+                        //         // console.log(featureGroupLayers[e]._latlngs);
+                        //         var array_points = []
+
+                        //         for (var k = 0; k < featureGroupLayers[e]._latlngs.length; k++ ) {
+                        //             array_points.push([featureGroupLayers[e]._latlngs[k].lng,featureGroupLayers[e]._latlngs[k].lat ]);
+                        //         }
+                        //         // console.log(array_points);
+                        //         array_points.push([featureGroupLayers[e]._latlngs[0].lng,featureGroupLayers[e]._latlngs[0].lat ]);
+
+                        //         var poly_feat = turf.polygon(array_points);
+                        //         var line_feat = turf.linestring(array_points);
+                        //         console.log(c2.geometry.coordinates);
+                        //         console.log(poly_feat.geometry.coordinates[poly_feat.geometry.coordinates.length-1]);
+                        //         console.log('adsljfnsdlfnalsdjfnalkjfnad'); 
+                        //             // c2 = turf.pointOnLine(line_feat, c2);
+                        //             c3 = turf.pointOnLine(line_feat, c3);
+
+                        //         if (turf.inside(c2,poly_feat)) {
+                                     
+                        //         } 
+                        //         if(turf.inside(c3,poly_feat)) {
+                        //             break;
+
+                        //         }
+
+                        //     }
+
+                        // }
+
+
                         line_points.push([c3.geometry.coordinates[1], c3.geometry.coordinates[0]]);
 
                         line_points.push([c2.geometry.coordinates[1], c2.geometry.coordinates[0]]);
@@ -223,10 +259,10 @@
 
 
 
-                var polyline_options = {
+                polyline_options = {
                     color: '#404040',
-                    opacity : 1,
-                    allowIntersection : false
+                    opacity : 1
+                    // allowIntersection : false
                 };
 
 
@@ -242,15 +278,27 @@
                         polyline = L.polyline(line_points, polyline_options);
                         map.addLayer(polyline);
                     } else {
-                        remove = true;
-                        polyline = L.polyline(line_points, polyline_options).addTo(featureGroup);
+                        map.removeLayer(polyline);
+
+                        polyline = L.polygon(line_points, polyline_options).bindLabel('nice', { noHide: true }).addTo(featureGroup);
+                        // map.showLabel();
+                        var divIcon = L.divIcon({ 
+                          html: "Name \n Requested frontage"
+                        })
+                        L.marker(polyline.getBounds().getCenter(), {icon: divIcon }).addTo(featureGroup);
+
+                         
+
+                        // map.showLabel(label);
+                        // console.log(featureGroup._layers);
                         $('#menu .ui-selected').removeClass('ui-selected','ui-selecting');
                         $('#menu').trigger('unselected');
                         // map.off('mouseover');
                         // map.off('mouseover', function() {alert('hello')});
                         map.off('mousemove',onMouseMove);
-
-                        console.log(map);
+                        first = 1;
+                        remove = true;
+                        // console.log(map);
                     }
                     
                 } 
@@ -279,6 +327,8 @@
                                         // featureGroup = L.featureGroup([featuresList]).addTo(map);
                                        // console.log(added_features);
                                        console.log('clicked');
+
+                                        
 
 
                                     });
